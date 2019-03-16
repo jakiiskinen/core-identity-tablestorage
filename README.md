@@ -2,7 +2,7 @@
 Table storage provider for AspNet Core Identity
 
 ## How to configure
-- Create an instance of `IDataContextSettingsProvider`, set the settings correctly and add it as a service.
+- Create an instance of `DataContextSettingsProvider` (or roll your own by implementing `IDataContextSettingsProvider`), set the properties correctly and add it as a service.
 - Call `IdentityBuilder` extension method `AddTableStorageIdentity<TUser>()`
 - Call` IdentityBuilder.AddUserStore<UserStore<TUser>>()`
 
