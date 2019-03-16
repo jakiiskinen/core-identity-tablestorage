@@ -59,6 +59,14 @@ namespace Core.Identity.TableStorage.Repositories
             return result.Result as T;
         }
 
+        public async Task DeleteAsync(T entity)
+        {
+            var tbl = GetTable();
+
+            var operation = TableOperation.Delete(entity);
+            await tbl.ExecuteAsync(operation);
+        }
+
         public async Task<T> GetAsync(string id)
         {
             var tbl = GetTable();

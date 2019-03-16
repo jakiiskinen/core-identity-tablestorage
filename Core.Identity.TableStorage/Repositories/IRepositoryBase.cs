@@ -10,5 +10,6 @@ namespace Core.Identity.TableStorage.Repositories
         Task<T> GetAsync(string id);
         Task<T> InsertAsync(T entity);
         Task<T> UpdateAsync(T entity);
+        Task DeleteAsync(T entity);
     }
 }
