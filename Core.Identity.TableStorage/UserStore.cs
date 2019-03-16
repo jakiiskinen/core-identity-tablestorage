@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Core.Identity.TableStorage.Repositories;
+using Microsoft.AspNetCore.Identity;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Core.Identity.TableStorage
 {
-    public class UserStore<T> : IUserStore<T>, IUserPasswordStore<T>, IUserEmailStore<T> where T : class, IUser, new()
+    public class UserStore<T> : IUserStore<T>, IUserPasswordStore<T>, IUserEmailStore<T>, IUserRoleStore<T> where T : class, IUser, new()
     {
         private readonly IUserRepository<T> _userRepository;
 
@@ -127,6 +129,31 @@ namespace Core.Identity.TableStorage
         {
             user.NormalizedEmail = normalizedEmail;
             return Task.CompletedTask;
+        }
+
+        public Task AddToRoleAsync(T user, string roleName, CancellationToken cancellationToken)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task RemoveFromRoleAsync(T user, string roleName, CancellationToken cancellationToken)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task<IList<string>> GetRolesAsync(T user, CancellationToken cancellationToken)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task<bool> IsInRoleAsync(T user, string roleName, CancellationToken cancellationToken)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public Task<IList<T>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
