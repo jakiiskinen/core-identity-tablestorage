@@ -1,27 +1,34 @@
 ﻿using Core.Identity.TableStorage.Repositories;
+using Core.Identity.TableStorage.Services;
 using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Core.Identity.TableStorage
 {
-    public class UserStore<T> : IUserStore<T>, IUserPasswordStore<T>, IUserEmailStore<T>, IUserRoleStore<T> where T : class, IUser, new()
+    public class UserStore<TUser, TRole, TUserRole> : IUserStore<TUser>, IUserPasswordStore<TUser>, IUserEmailStore<TUser>, IUserRoleStore<TUser> 
+        where TUser : class, IUser, new()
+        where TRole : class, IRole, new()
+        where TUserRole : class, IUserRole, new()
     {
-        private readonly IUserRepository<T> _userRepository;
+        private readonly IUserRepository<TUser> _userRepository;
+        private readonly IUserRoleService<TUser, TRole, TUserRole> _userRoleService;
 
-        public UserStore(IUserRepository<T> userRepository)
+        public UserStore(IUserRepository<TUser> userRepository, IUserRoleService<TUser, TRole, TUserRole> userRoleService)
         {
             _userRepository = userRepository;
+            _userRoleService = userRoleService;
         }
 
-        public async Task<IdentityResult> CreateAsync(T user, CancellationToken cancellationToken)
+        public async Task<IdentityResult> CreateAsync(TUser user, CancellationToken cancellationToken)
         {
             var result = await _userRepository.InsertAsync(user);
             return IdentityResult.Success;
         }
 
-        public Task<IdentityResult> DeleteAsync(T user, CancellationToken cancellationToken)
+        public Task<IdentityResult> DeleteAsync(TUser user, CancellationToken cancellationToken)
         {
             return Task.FromResult(IdentityResult.Success);
         }
@@ -30,130 +37,136 @@ namespace Core.Identity.TableStorage
         {
         }
 
-        public async Task<T> FindByIdAsync(string userId, CancellationToken cancellationToken)
+        public async Task<TUser> FindByIdAsync(string userId, CancellationToken cancellationToken)
         {
             var user = await _userRepository.GetAsync(userId);
             return user;
         }
 
-        public Task<T> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
+        public Task<TUser> FindByNameAsync(string normalizedUserName, CancellationToken cancellationToken)
         {
             var user = _userRepository.FindByName(normalizedUserName);
             return Task.FromResult(user);
         }
 
-        public Task<string> GetNormalizedUserNameAsync(T user, CancellationToken cancellationToken)
+        public Task<string> GetNormalizedUserNameAsync(TUser user, CancellationToken cancellationToken)
         {
             return Task.FromResult(user.NormalizedUserName);
         }
 
-        public Task<string> GetUserIdAsync(T user, CancellationToken cancellationToken)
+        public Task<string> GetUserIdAsync(TUser user, CancellationToken cancellationToken)
         {
             return Task.FromResult(user.Id);
         }
 
-        public Task<string> GetUserNameAsync(T user, CancellationToken cancellationToken)
+        public Task<string> GetUserNameAsync(TUser user, CancellationToken cancellationToken)
         {
             return Task.FromResult(user.UserName);
         }
 
-        public Task SetNormalizedUserNameAsync(T user, string normalizedName, CancellationToken cancellationToken)
+        public Task SetNormalizedUserNameAsync(TUser user, string normalizedName, CancellationToken cancellationToken)
         {
             user.NormalizedUserName = normalizedName;
             return Task.CompletedTask;
         }
 
-        public Task SetUserNameAsync(T user, string userName, CancellationToken cancellationToken)
+        public Task SetUserNameAsync(TUser user, string userName, CancellationToken cancellationToken)
         {
             user.UserName = userName;
             return Task.CompletedTask;
         }
 
-        public async Task<IdentityResult> UpdateAsync(T user, CancellationToken cancellationToken)
+        public async Task<IdentityResult> UpdateAsync(TUser user, CancellationToken cancellationToken)
         {
             await _userRepository.UpdateAsync(user);
             return IdentityResult.Success;
         }
 
-        public Task SetPasswordHashAsync(T user, string passwordHash, CancellationToken cancellationToken)
+        public Task SetPasswordHashAsync(TUser user, string passwordHash, CancellationToken cancellationToken)
         {
             user.Password = passwordHash;
             return Task.CompletedTask;
         }
 
-        public async Task<string> GetPasswordHashAsync(T user, CancellationToken cancellationToken)
+        public async Task<string> GetPasswordHashAsync(TUser user, CancellationToken cancellationToken)
         {
             var u = await _userRepository.GetAsync(user.Id);
             return u?.Password;
         }
 
-        public async Task<bool> HasPasswordAsync(T user, CancellationToken cancellationToken)
+        public async Task<bool> HasPasswordAsync(TUser user, CancellationToken cancellationToken)
         {
             var u = await _userRepository.GetAsync(user.Id);
             return !string.IsNullOrWhiteSpace(u.Password);
         }
 
-        public Task SetEmailAsync(T user, string email, CancellationToken cancellationToken)
+        public Task SetEmailAsync(TUser user, string email, CancellationToken cancellationToken)
         {            
             user.Email = email;
             return Task.CompletedTask;
         }
 
-        public Task<string> GetEmailAsync(T user, CancellationToken cancellationToken)
+        public Task<string> GetEmailAsync(TUser user, CancellationToken cancellationToken)
         {
             return Task.FromResult(user.Email);
         }
 
-        public Task<bool> GetEmailConfirmedAsync(T user, CancellationToken cancellationToken)
+        public Task<bool> GetEmailConfirmedAsync(TUser user, CancellationToken cancellationToken)
         {
             return Task.FromResult(user.EmailConfirmed);
         }
 
-        public Task SetEmailConfirmedAsync(T user, bool confirmed, CancellationToken cancellationToken)
+        public Task SetEmailConfirmedAsync(TUser user, bool confirmed, CancellationToken cancellationToken)
         {
             user.EmailConfirmed = confirmed;
             return Task.CompletedTask;
         }
 
-        public Task<T> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
+        public Task<TUser> FindByEmailAsync(string normalizedEmail, CancellationToken cancellationToken)
         {
             return Task.FromResult(_userRepository.FindByEmail(normalizedEmail));
         }
 
-        public Task<string> GetNormalizedEmailAsync(T user, CancellationToken cancellationToken)
+        public Task<string> GetNormalizedEmailAsync(TUser user, CancellationToken cancellationToken)
         {
             return Task.FromResult(user.NormalizedEmail);
         }
 
-        public Task SetNormalizedEmailAsync(T user, string normalizedEmail, CancellationToken cancellationToken)
+        public Task SetNormalizedEmailAsync(TUser user, string normalizedEmail, CancellationToken cancellationToken)
         {
             user.NormalizedEmail = normalizedEmail;
             return Task.CompletedTask;
         }
 
-        public Task AddToRoleAsync(T user, string roleName, CancellationToken cancellationToken)
+        public async Task AddToRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            await _userRoleService.AddUserToRoleAsync(user, roleName);
         }
 
-        public Task RemoveFromRoleAsync(T user, string roleName, CancellationToken cancellationToken)
+        public async Task RemoveFromRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            await _userRoleService.RemoveUserFromRoleAsync(user, roleName);
         }
 
-        public Task<IList<string>> GetRolesAsync(T user, CancellationToken cancellationToken)
+        public async Task<IList<string>> GetRolesAsync(TUser user, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            var roles = await _userRoleService.GetRolesByUser(user.Id);
+            return roles.Select(r => r.Name).ToList();
         }
 
-        public Task<bool> IsInRoleAsync(T user, string roleName, CancellationToken cancellationToken)
+        public Task<bool> IsInRoleAsync(TUser user, string roleName, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            return Task.FromResult(_userRoleService.UserHasRole(user.Id, roleName));
         }
 
-        public Task<IList<T>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
+        public async Task<IList<TUser>> GetUsersInRoleAsync(string roleName, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            return await _userRoleService.GetUsersByRole(roleName);
+        }
+
+        public List<TUser> GetAllUsersAsync()
+        {
+            return _userRepository.GetAll();
         }
     }
 }
