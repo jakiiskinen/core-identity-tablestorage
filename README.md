@@ -3,8 +3,8 @@ Table storage provider for AspNet Core Identity
 
 ## How to configure
 - Create an instance of `DataContextSettingsProvider` (or roll your own by implementing `IDataContextSettingsProvider`), set the properties correctly and add it as a service.
-- Call `IdentityBuilder` extension method `AddTableStorageIdentity<TUser>()`
-- Call `IdentityBuilder.AddUserStore<UserStore<TUser>>()` or `IdentityBuilder.AddUserStore<UserStore<TUser, TRole>>()`
+- Call `IdentityBuilder` extension method `AddTableStorageIdentity<TUser, TRole, TUserRole>()`
+- Call `IdentityBuilder.AddUserStore<UserStore<TUser, TRole, TUserRole>>()`
 
 With these configurations, the basic user management features should be available.
 
