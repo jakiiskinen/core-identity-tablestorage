@@ -23,5 +23,6 @@ namespace Core.Identity.TableStorage
         public string NormalizedEmail { get; set; }
         public string Password { get; set; }
         public bool EmailConfirmed { get; set; }
+        public string DisplayName { get; set; }
     }
 }
