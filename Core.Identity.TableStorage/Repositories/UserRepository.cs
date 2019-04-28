@@ -48,8 +48,10 @@ namespace Core.Identity.TableStorage.Repositories
             {
                 var tbl = GetTable();
                 var query = new TableQuery<T>()
-                    .Where(TableQuery.GenerateFilterCondition(nameof(IUser.NormalizedEmail), QueryComparisons.Equal, normalizedEmail))
-                    .Where(TableQuery.GenerateFilterCondition(nameof(IUser.PartitionKey), QueryComparisons.Equal, DataContextSettingsProvider.PartitionKey));
+                    .Where(TableQuery.CombineFilters(
+                        TableQuery.GenerateFilterCondition(nameof(IUser.NormalizedEmail), QueryComparisons.Equal, normalizedEmail),                    
+                        TableOperators.And,
+                        TableQuery.GenerateFilterCondition(nameof(IUser.PartitionKey), QueryComparisons.Equal, DataContextSettingsProvider.PartitionKey)));
 
                 var result = tbl.ExecuteQuery(query).ToList();
 
